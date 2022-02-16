@@ -75,36 +75,34 @@ def _seed_SelfedPlant(genes, heritability):
 			genes[key]=create_Colors(start=value[1:])
 	return genes
 
-def _create_Circle( x, y, r, **kwargs):
-	return canvas.create_oval(x-r, y-r, x+r, y+r, **kwargs)
+def _create_Circle(self, x, y, r, **kwargs):
+	return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
 tk.Canvas.create_Circle = _create_Circle
 
-def _create_Petals( x, y, petal_num, radius, xFactor, coefficent, **kwargs):
+def _create_Petals(self, x, y, petal_num, radius, xFactor, coefficent, **kwargs):
 	points = []
 	for degrees in range(0, 360-xFactor):
 		radians = math.radians(degrees)
 		distance = math.sin(radians * petal_num) * radius
 		points.append(x+math.cos(coefficent*radians) * distance)
 		points.append(y+math.sin(coefficent*radians) * distance)
-	return canvas.create_polygon(points,smooth=0, **kwargs)
+	return self.create_polygon(points,smooth=0, **kwargs)
 tk.Canvas.create_Petals = _create_Petals
 
-def _create_Flowers( bud_x, bud_y, genes):
+def _create_Flowers(self, bud_x, bud_y, genes):
 	for l in range(genes["layer_num"]):
-		canvas.create_Petals(bud_x, bud_y, 
+		self.create_Petals(bud_x, bud_y, 
 					petal_num=genes["petal_num"], radius=genes["petal_rad"], xFactor=genes["petal_xFact"], coefficent=genes["petal_coeff"],  
 					fill=genes["petal_fill"], outline=genes["petal_line"], width=genes["petal_linewid"])
-		canvas.create_Circle(bud_x, bud_y, r=genes["center_rad"],
+		self.create_Circle(bud_x, bud_y, r=genes["center_rad"],
 				fill=genes["center_fill"], outline=genes["center_line"], 
 				width=genes["center_linewid"]) # stipple=genes["center_stipple"]
 tk.Canvas.create_Flowers = _create_Flowers
 
-def _create_Stems(x, y, thickness, height, angle, branches):
-	points = [x, y]
-	print(height)
-	print(thickness)
-	#points += [x, y2, x2, y]
-	#self.create_polygon(points)
+def _create_Stems(self, x, y, base_x, base_y, thickness, height, angle, branches):
+	points = [x, y, base_x, base_y,]
+	points += [base_x, base_y+thickness, base_x+height, base_y]
+	self.create_polygon(points)
 
 	""" 
 	if depth >= 0:
@@ -139,11 +137,13 @@ if __name__ == '__main__':
 	flower_num=1	
 	bud_x = [random.randint(10, WIDTH-10)]
 	bud_y = [random.randint(10, HEIGHT-10)]
-
-	#create_Stems(x = bud_x, y = bud_y, thickness=10, height=40,  angle=60, branches=1)
-
+	base_x = WIDTH/2
+	base_y = HEIGHT
+	
 	for i in range(flower_num):
-		create_Flowers(bud_x[i], bud_y[i], genes)
+		canvas.create_Stems(bud_x[i], bud_y[i], base_x, base_y,
+			thickness=10, height=40,  angle=60, branches=1)
+		canvas.create_Flowers(bud_x[i], bud_y[i], genes)
 
 	root.mainloop()
 
