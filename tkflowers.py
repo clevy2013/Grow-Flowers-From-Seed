@@ -8,7 +8,7 @@ except ImportError:
 	import Tkinter as tk  # Python 2
 import random
 import math
-
+from statistics import mean
 
 #Set Display Variables
 WIDTH, HEIGHT = 900, 700
@@ -16,23 +16,36 @@ WIDTH, HEIGHT = 900, 700
 #Set Default Plant Genetics
 def _seed_DefaultPlant():
 	#Set Genetics
-	GENES={"petal_num":8, "petal_rad":50, "petal_xFact":25, "petal_line": "#b5e3af", "petal_fill":"#D773A2", "petal_linewid":2, "petal_coeff":5,
-	"center_line":"#b2b2ff", "center_fill":"#72c6ff", "center_linewid":4,"center_rad":25, "center_stipple":"",
-	"layer_num":3, "layer_coeff":5,
-	}
+	GENES={"petal_num":7, "petal_rad":80.0, "petal_xFact":2, "petal_line": "#b5e3af", "petal_fill":"#D773A2", "petal_linewid":2.0, "petal_coeff":6,
+	"center_line":"#b2b2ff", "center_fill":"#72c6ff", "center_linewid":1.0,"center_rad":5.0, "center_stipple":"",
+	"layer_num":1, "layer_coeff":2.0}
 	GENES["center_rad"]=round(GENES["petal_rad"]/10)	
 	
 	#Set Heritability
 	HERIT={"petal_num":0.5, "petal_rad":0.5, "petal_xFact":0.5, "petal_line": 0.5, "petal_fill":0.5, "petal_linewid":0.5, "petal_coeff":0.5,
 	"center_line":0.5, "center_fill":0.5, "center_linewid":0.5,"center_rad":0.5, "center_stipple":"",
-	"layer_num":0.5, "layer_coeff":0.5,
-	}
+	"layer_num":0.5, "layer_coeff":0.5}
 	return GENES
 
 def create_Colors(start='ABCDEF0123456789'):
 	#TODO if bright add FFF if dark add 000
 	rand_colors = ["#"+''.join([random.choice(start) for i in range(6)])]
 	return rand_colors
+
+def linspace(start, stop, n):
+    if n == 1:
+        yield stop
+        return
+    h = (stop - start) / (n - 1)
+    for i in range(n):
+        yield start + h * i
+
+def create_Lines(x1, y1, x2, y2):
+	a = int(abs(x1-x2)/10)
+	xlist = list(linspace(x1, x2, a))
+	ylist = [newx+ 1/math.tan(20) for newx in xlist ] 
+	return [sub[item] for item in range(len(xlist))
+                      for sub in [xlist, ylist]]
 
 def create_Reason(genes):
 	while genes["petal_num"]<3:
@@ -47,8 +60,6 @@ def create_Reason(genes):
 		genes["center_rad"]+= random.randint(1, 40)
 	while genes["layer_num"] <=0:
 		genes["layer_num"]+= random.randint(1, 2)
-	while genes["petal_coeff"] <=0:
-		genes["petal_coeff"]+= random.randint(1, 10)
 	return genes
 
 def _seed_RandomPlant():
@@ -56,12 +67,19 @@ def _seed_RandomPlant():
 	for key, value in genes.items():
 		if isinstance(value, int):
 			newval=random.weibullvariate(value, 1)
-			newval=round(newval)
-			newval=int(newval)
+			newval=math.ceil(newval)
+			newval=int(abs(newval))
 			genes.update({key:newval})
-		else:
-			genes.update({key:create_Colors()})
-		genes = create_Reason(genes)
+		elif isinstance(value, float):
+			newval=random.weibullvariate(value, 1)
+			genes.update({key:newval})
+		elif isinstance(value, bool):
+			newval=random.randchoice(True, False)
+			genes.update({key:newval})
+		elif isinstance(value, str): 
+			newval=create_Colors()	
+			genes.update({key:newval})	
+	#genes = create_Reason(genes)
 	return genes
 
 def _seed_SelfedPlant(genes, heritability):
@@ -71,7 +89,12 @@ def _seed_SelfedPlant(genes, heritability):
 			newval=round(newval)
 			newval=int(newval)
 			genes[key]=newval
-		else: 
+		elif isinstance(value, float):
+			newval=random.weibullvariate(value, value*heritability)
+			genes[key]=newval
+		elif isinstance(value, boolean):
+			genes[key]=random.randchoice(True, False)
+		elif isinstance(value, string): 
 			genes[key]=create_Colors(start=value[1:])
 	return genes
 
@@ -100,9 +123,9 @@ def _create_Flowers(self, bud_x, bud_y, genes):
 tk.Canvas.create_Flowers = _create_Flowers
 
 def _create_Stems(self, x, y, base_x, base_y, thickness, height, angle, branches):
-	points = [x, y, base_x, base_y,]
-	points += [base_x, base_y+thickness, base_x+height, base_y]
-	self.create_polygon(points)
+	points = [x,y, base_x, base_y, base_x-thickness, base_y, base_x+thickness, base_y]
+	#points += create_Lines(x, y, base_x, base_y)
+	self.create_polygon(points, smooth = 1)
 
 	""" 
 	if depth >= 0:
@@ -131,12 +154,11 @@ if __name__ == '__main__':
 	try:
 		genes = _seed_RandomPlant()
 	except:
-		print("Experienced an Error")
 		genes = _seed_DefaultPlant()
 
 	flower_num=1	
-	bud_x = [random.randint(10, WIDTH-10)]
-	bud_y = [random.randint(10, HEIGHT-10)]
+	bud_x = [random.randint(10, WIDTH-10, flower_num)]
+	bud_y = [random.randint(10, HEIGHT-10, flower_num)]
 	base_x = WIDTH/2
 	base_y = HEIGHT
 	
