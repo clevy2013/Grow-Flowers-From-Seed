@@ -40,20 +40,43 @@ def linspace(start, stop, n):
     for i in range(n):
         yield start + h * i
 
-def create_Lines(x1, y1, x2, y2):
-	a = int(abs(x1-x2)/10)
-	xlist = list(linspace(x1, x2, a))
-	ylist = [newx+ 1/math.tan(20) for newx in xlist ] 
-	return [sub[item] for item in range(len(xlist))
-                      for sub in [xlist, ylist]]
+def create_Lines(x1, y1, x2, y2, wave_height = 10, wave_length = 50, curveSquaring = .1):
+
+	assert 0 <= curveSquaring <= 1, 'curveSquaring should be a value between 0 and 1: {}'.format(curveSquaring)
+	assert wave_length > 0, 'wavelength smaller or equal to zero: {}'.format(wave_length)
+
+	diagonal = math.sqrt((x1 - x2)**2 + (y1 - y2)**2) 
+	angle = math.atan2((y2-y1), (x2-x1)) # radians
+	wave_n = diagonal//int(wave_length) #number of waves
+	wave_i = diagonal/float(wave_n) #interval of waves
+	bez_ml = math.sqrt((wave_i/4.)**2+wave_height/2.)**2 #max bezier curve point length
+	bez_l = bez_ml*curveSquaring #bezier length
+	bez_i = math.atan2((wave_height/2.-0), (wave_i/4.-0)) #bezier inclination	
+	
+	points_wiggly = [x1, y1]
+	flexpt = [x1, y1]
+	polarity = 1
+
+	for waveIndex in range(0, int(wave_n*5)):
+		bez_oa = angle+bez_i*polarity #Bezier out angle 
+		bez_os = [flexpt[0]+math.cos(bez_oa)*bez_l, flexpt[1]+math.sin(bez_oa)*bez_l] #bezier outside
+		flexpt = [flexpt[0]+math.cos(angle)*wave_i/2., flexpt[1]+math.sin(angle)*wave_i/2.]
+		bez_ia = angle+(math.radians(180)-bez_i)*polarity #bezier interior angle
+		bez_in = [flexpt[0]+math.cos(bez_ia)*bez_l, flexpt[1]+math.sin(bez_ia)*bez_l] #bezier interiro
+		
+		points_wiggly += [bez_os, bez_in, flexpt]
+		points_wiggly += bez_in
+		points_wiggly += flexpt
+
+		polarity *= -1
+	return points_wiggly
+	
 
 def create_Reason(genes):
 	while genes["petal_num"]<3:
-		genes["petal_num"] += random.randint(1, 3)
+		genes["petal_num"] += random.randint(1, 5)
 	while genes["petal_rad"] <= 5*(genes["center_rad"] + genes["center_linewid"]):
 		genes["petal_rad"] += random.randint(1, 12)
-	while genes["center_rad"]<1:
-		genes["center_rad"] += random.randint(1, 3)
 	while genes["petal_xFact"]>100: 
 		genes["petal_xFact"]-= random.randint(1, 30)
 	while genes["center_rad"] < 2*genes["center_linewid"]:
@@ -72,6 +95,7 @@ def _seed_RandomPlant():
 			genes.update({key:newval})
 		elif isinstance(value, float):
 			newval=random.weibullvariate(value, 1)
+			newval=float(abs(newval))
 			genes.update({key:newval})
 		elif isinstance(value, bool):
 			newval=random.randchoice(True, False)
@@ -79,7 +103,7 @@ def _seed_RandomPlant():
 		elif isinstance(value, str): 
 			newval=create_Colors()	
 			genes.update({key:newval})	
-	#genes = create_Reason(genes)
+	genes = create_Reason(genes)
 	return genes
 
 def _seed_SelfedPlant(genes, heritability):
@@ -123,9 +147,11 @@ def _create_Flowers(self, bud_x, bud_y, genes):
 tk.Canvas.create_Flowers = _create_Flowers
 
 def _create_Stems(self, x, y, base_x, base_y, thickness, height, angle, branches):
-	points = [x,y, base_x, base_y, base_x-thickness, base_y, base_x+thickness, base_y]
-	#points += create_Lines(x, y, base_x, base_y)
-	self.create_polygon(points, smooth = 1)
+	points = [] #[base_x-thickness, base_y, base_x+thickness, base_y]
+	points += create_Lines(x, y, base_x-thickness, base_y)
+	#points += create_Lines(x, y, base_x+thickness, base_y)
+	print(points)
+	self.create_line(points)
 
 	""" 
 	if depth >= 0:
@@ -135,7 +161,7 @@ def _create_Stems(self, x, y, base_x, base_y, thickness, height, angle, branches
 		y2 = y - int(math.sin(angle) * height)
 
 		# Draw the line
-		self.create_line(x1,y1, x2,y2, width=thickness)
+		self.create_line(x1,y1, x2,y2, width=thickness, fill = "white")
 		
 		# Draw the left branch
 		self.paintBranch(depth, x2, y2, length * self.sizeFactor, angle + self.angleFactor  )
@@ -157,8 +183,8 @@ if __name__ == '__main__':
 		genes = _seed_DefaultPlant()
 
 	flower_num=1	
-	bud_x = [random.randint(10, WIDTH-10, flower_num)]
-	bud_y = [random.randint(10, HEIGHT-10, flower_num)]
+	bud_x = [random.randint(10, WIDTH-10) for i in range(flower_num) ]
+	bud_y = [random.randint(10, HEIGHT-10) for i in range(flower_num) ]
 	base_x = WIDTH/2
 	base_y = HEIGHT
 	
