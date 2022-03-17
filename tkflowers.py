@@ -13,25 +13,10 @@ from statistics import mean
 #Set Display Variables
 WIDTH, HEIGHT = 900, 700
 
-#Set Default Plant Genetics
-def _seed_DefaultPlant():
-	#Set Genetics
-	GENES={"petal_num":7, "petal_rad":80.0, "petal_xFact":2, "petal_line": "#b5e3af", "petal_fill":"#D773A2", "petal_linewid":2.0, "petal_coeff":6,
-	"center_line":"#b2b2ff", "center_fill":"#72c6ff", "center_linewid":1.0,"center_rad":5.0, "center_stipple":"",
-	"layer_num":1, "layer_coeff":2.0}
-	GENES["center_rad"]=round(GENES["petal_rad"]/10)	
-	
-	#Set Heritability
-	HERIT={"petal_num":0.5, "petal_rad":0.5, "petal_xFact":0.5, "petal_line": 0.5, "petal_fill":0.5, "petal_linewid":0.5, "petal_coeff":0.5,
-	"center_line":0.5, "center_fill":0.5, "center_linewid":0.5,"center_rad":0.5, "center_stipple":"",
-	"layer_num":0.5, "layer_coeff":0.5}
-	return GENES
-
+#Simple Functions
 def create_Colors(start='ABCDEF0123456789'):
-	#TODO if bright add FFF if dark add 000
 	rand_colors = ["#"+''.join([random.choice(start) for i in range(6)])]
 	return rand_colors
-
 def linspace(start, stop, n):
     if n == 1:
         yield stop
@@ -39,6 +24,82 @@ def linspace(start, stop, n):
     h = (stop - start) / (n - 1)
     for i in range(n):
         yield start + h * i
+        
+
+#Grow My Plants
+
+class phenotype:
+        def __init__(self, petal_num, petal_rad, petal_xFact, petal_line, petal_fill, petal_linewid, petal_coeff,
+                     center_rad, center_line, center_fill, center_linewid, center_stipple,
+                     layer_num, layer_coeff):
+                self.petal_num = petal_num
+                self.petal_rad = petal_rad
+                self.petal_xFact = petal_xFact
+                self.petal_line = petal_line
+                self.petal_fill = petal_fill
+                self.petal_linewid = petal_linewid
+                self.petal_coeff = petal_coeff
+                self.center_rad =  center_rad
+                self.center_line = center_line
+                self.center_fill = center_fill
+                self.center_linewid = center_linewid
+                self.center_stipple = center_stipple
+                self.layer_num = layer_num
+                self.layer_coeff = layer_coeff
+class parent1:
+        def __init__(self, placehold):
+                placehold = placehold     
+class parent2:
+        def __init__(self, placehold):
+                placehold = placehold      
+class expression:
+        def __init__(self, placehold):
+                placehold = placehold     
+class heritability:
+        def __init__(self, placehold):
+                placehold = placehold  
+
+class SeedAPlant:
+        def __init__(self, phenotype, parent1, parent2, expression, heritability):
+                self.phenotype=phenotype
+                self.parent1 = parent1
+                self.parent2 = parent2
+                self.expression = expression
+                self.heritability = heritability
+                     
+        def Random(self, phenotype, parent1, parent2, expression, heritability):
+                phenotype.petal_num = random.randint(phenotype.petal_num[1], phenotype.petal_num[2])
+                phenotype.petal_rad = random.randint(phenotype.petal_rad[1], phenotype.petal_rad[2])
+                phenotype.petal_xFact = random.randint(phenotype.petal_xFact[1], phenotype.petal_xFact[2])
+                phenotype.petal_line = create_Colors(phenotype.petal_line)
+                phenotype.petal_fill = create_Colors(phenotype.petal_fill)
+                phenotype.petal_linewid = random.uniform(phenotype.petal_linewid[1], phenotype.petal_linewid[2])
+                phenotype.petal_coeff = random.randint(phenotype.petal_coeff[1], phenotype.petal_coeff[2])
+                phenotype.center_rad =  random.randint(phenotype.center_rad[1], phenotype.center_rad[2])
+                phenotype.center_line = create_Colors(phenotype.center_line)
+                phenotype.center_fill = create_Colors(phenotype.center_fill)
+                phenotype.center_linewid = random.uniform(phenotype.center_linewid[1], phenotype.center_linewid[2])
+                phenotype.center_stipple = create_Colors(phenotype.center_stipple)
+                phenotype.layer_num = random.randint(phenotype.layer_num[1], phenotype.layer_num[2])
+                phenotype.layer_coeff = random.uniform(phenotype.layer_coeff[1], phenotype.layer_coeff[2])
+
+def Crossed(parent1, parent2):
+       newplant = DefaultPlant()
+       newplant.phenotype
+       newplant.parent1 = parent1.phenotype
+       newplant.parent2 = parent2.phenotype
+       newplant.expression #random.choice(parent1.expression, parent2.expression)
+       newplant.heritability #random.randbetween(random.gauss(parent1.heritability, .1), random.gauss(parent2.heritability, .1))
+       return newplant
+       
+def SelfedPlant():
+       newplant = DefaultPlant()
+       newplant.phenotype
+       newplant.parent1 = parent1.phenotype
+       newplant.parent2 = []
+       newplant.expression #random.choice(parent1.expression)
+       newplant.heritability #random.gauss(parent1.heritability, .1)
+       return newplant
 
 def create_Lines(x1, y1, x2, y2, wave_height = 10, wave_length = 50, curveSquaring = .1):
 
@@ -70,57 +131,6 @@ def create_Lines(x1, y1, x2, y2, wave_height = 10, wave_length = 50, curveSquari
 
 		polarity *= -1
 	return points_wiggly
-	
-
-def create_Reason(genes):
-	while genes["petal_num"]<3:
-		genes["petal_num"] += random.randint(1, 5)
-	while genes["petal_rad"] <= 5*(genes["center_rad"] + genes["center_linewid"]):
-		genes["petal_rad"] += random.randint(1, 12)
-	while genes["petal_xFact"]>100: 
-		genes["petal_xFact"]-= random.randint(1, 30)
-	while genes["center_rad"] < 2*genes["center_linewid"]:
-		genes["center_rad"]+= random.randint(1, 40)
-	while genes["layer_num"] <=0:
-		genes["layer_num"]+= random.randint(1, 2)
-	return genes
-
-def _seed_RandomPlant():
-	genes = _seed_DefaultPlant()
-	for key, value in genes.items():
-		if isinstance(value, int):
-			newval=random.weibullvariate(value, 1)
-			newval=math.ceil(newval)
-			newval=int(abs(newval))
-			genes.update({key:newval})
-		elif isinstance(value, float):
-			newval=random.weibullvariate(value, 1)
-			newval=float(abs(newval))
-			genes.update({key:newval})
-		elif isinstance(value, bool):
-			newval=random.randchoice(True, False)
-			genes.update({key:newval})
-		elif isinstance(value, str): 
-			newval=create_Colors()	
-			genes.update({key:newval})	
-	genes = create_Reason(genes)
-	return genes
-
-def _seed_SelfedPlant(genes, heritability):
-	for key, value in genes.items():
-		if isinstance(value, int):
-			newval=random.weibullvariate(value, value*heritability)
-			newval=round(newval)
-			newval=int(newval)
-			genes[key]=newval
-		elif isinstance(value, float):
-			newval=random.weibullvariate(value, value*heritability)
-			genes[key]=newval
-		elif isinstance(value, boolean):
-			genes[key]=random.randchoice(True, False)
-		elif isinstance(value, string): 
-			genes[key]=create_Colors(start=value[1:])
-	return genes
 
 def _create_Circle(self, x, y, r, **kwargs):
 	return self.create_oval(x-r, y-r, x+r, y+r, **kwargs)
@@ -136,41 +146,28 @@ def _create_Petals(self, x, y, petal_num, radius, xFactor, coefficent, **kwargs)
 	return self.create_polygon(points,smooth=0, **kwargs)
 tk.Canvas.create_Petals = _create_Petals
 
-def _create_Flowers(self, bud_x, bud_y, genes):
-	for l in range(genes["layer_num"]):
-		self.create_Petals(bud_x, bud_y, 
-					petal_num=genes["petal_num"], radius=genes["petal_rad"], xFactor=genes["petal_xFact"], coefficent=genes["petal_coeff"],  
-					fill=genes["petal_fill"], outline=genes["petal_line"], width=genes["petal_linewid"])
-		self.create_Circle(bud_x, bud_y, r=genes["center_rad"],
-				fill=genes["center_fill"], outline=genes["center_line"], 
-				width=genes["center_linewid"]) # stipple=genes["center_stipple"]
+def _create_Flowers(self, bud_x, bud_y, seed):
+        phenotype=seed.phenotype
+        for l in range(phenotype.layer_num[0]):
+                self.create_Petals(bud_x, bud_y, phenotype.petal_num[0], radius=phenotype.petal_rad[0], xFactor=phenotype.petal_xFact[0], coefficent=phenotype.petal_coeff[0], fill=phenotype.petal_fill[0], outline=phenotype.petal_line[0], width=phenotype.petal_linewid[0])
+                self.create_Circle(bud_x, bud_y, r=phenotype.center_rad[0], fill=phenotype.center_fill[0], outline=phenotype.center_line[0], width=phenotype.center_linewid[0]) # stipple=phenotype.center_stipple
 tk.Canvas.create_Flowers = _create_Flowers
 
 def _create_Stems(self, x, y, base_x, base_y, thickness, height, angle, branches):
 	points = [] #[base_x-thickness, base_y, base_x+thickness, base_y]
 	points += create_Lines(x, y, base_x-thickness, base_y)
-	#points += create_Lines(x, y, base_x+thickness, base_y)
-	print(points)
 	self.create_line(points)
-
-	""" 
-	if depth >= 0:
-		depth -= 1
-		thickness -= thickness/depth
-		x2 = x + int(math.cos(angle) * height)
-		y2 = y - int(math.sin(angle) * height)
-
-		# Draw the line
-		self.create_line(x1,y1, x2,y2, width=thickness, fill = "white")
-		
-		# Draw the left branch
-		self.paintBranch(depth, x2, y2, length * self.sizeFactor, angle + self.angleFactor  )
-		# Draw the right branch
-            	self.paintBranch(depth, x2, y2, length * self.sizeFactor, angle - self.angleFactor )  
-	"""       
 	canvas.create_polygon(points)
 tk.Canvas.create_Stems = _create_Stems
-	
+
+#Import Plant Seeds
+seed_default = (phenotype([7, 3, 10], [80.0, 10.0, 100.0], [2, 0, 10], ["#b5e3af"], ["#D773A2"], [2.0, 0.0, 50.0], [6, 0, 180],
+        [8, 0, 50], ["#b2b2ff"], ["#72c6ff"], [1.0, 0.0, 50.0], ["#b2b2ff"],
+        [1, 1, 10], [2.0, 0, 5.0]),
+                parent1(1),
+                parent2(1),
+                expression(1),
+                heritability(1))	
 
 if __name__ == '__main__':
 	root = tk.Tk()
@@ -178,9 +175,10 @@ if __name__ == '__main__':
 	canvas.grid()
 
 	try:
-		genes = _seed_RandomPlant()
-	except:
-		genes = _seed_DefaultPlant()
+                NewSeed = SeedAPlant.Random(seed_default[0], seed_default[1], seed_default[2], seed_default[3], seed_default[4])
+	except Exception as e:
+                print(e)
+                NewSeed = SeedAPlant(seed_default[0], seed_default[1], seed_default[2], seed_default[3], seed_default[4])
 
 	flower_num=1	
 	bud_x = [random.randint(10, WIDTH-10) for i in range(flower_num) ]
@@ -191,20 +189,7 @@ if __name__ == '__main__':
 	for i in range(flower_num):
 		canvas.create_Stems(bud_x[i], bud_y[i], base_x, base_y,
 			thickness=10, height=40,  angle=60, branches=1)
-		canvas.create_Flowers(bud_x[i], bud_y[i], genes)
+		canvas.create_Flowers(bud_x[i], bud_y[i], NewSeed)
 
 	root.mainloop()
 
-"""
-def _seed_BredPlants(genes1, genes2):
-	gene=dict()
-	for gene1, gene2 in zip(genes1.values(), genes2.values()) :
-		if isinstance(gene, int):
-			gene=random.choice(gene1, gene2, mean(gene1, gene2), random.gauss(mean(gene1, gene2)))
-		else:
-			gene=create_Colors(start=gene1[1:]+gene2[1:])
-	return genes
-
-
-
-"""
